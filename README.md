@@ -18,27 +18,27 @@ http://www.rabbitmq.com/plugin-development.html
 
 tl;dr:
 
-  $ hg clone http://hg.rabbitmq.com/rabbitmq-public-umbrella
-  $ cd rabbitmq-public-umbrella
-  $ make co
-  $ git clone https://github.com/simonmacmullen/rabbitmq-management-exchange.git
-  $ cd rabbitmq-management-exchange
-  $ make -j
+    $ hg clone http://hg.rabbitmq.com/rabbitmq-public-umbrella
+    $ cd rabbitmq-public-umbrella
+    $ make co
+    $ git clone https://github.com/simonmacmullen/rabbitmq-management-exchange.git
+    $ cd rabbitmq-management-exchange
+    $ make -j
 
 ## Configuring
 
 Enable the plugin:
 
-  rabbitmq-plugins enable rabbitmq_management_exchange
+    rabbitmq-plugins enable rabbitmq_management_exchange
 
 Configure the plugin to authenticate:
-
-(see http://www.rabbitmq.com/configure.html for general help on that)
 
     [
       {rabbitmq_management_exchange, [{username, "my-username"},
                                       {password, "my-password"}]}
     ].
+
+(see http://www.rabbitmq.com/configure.html for general help on that)
 
 ## Using
 
