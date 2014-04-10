@@ -11,6 +11,11 @@ for the HTTP request are taken from your configuration file rather
 than the AMQP connection. If there is sufficient interest in this
 plugin, we'll work to remove this limitation.
 
+## Downloading
+
+You can download a pre-built binary of this plugin from
+http://www.rabbitmq.com/community-plugins.html.
+
 ## Building
 
 Build it like any other plugin. See
