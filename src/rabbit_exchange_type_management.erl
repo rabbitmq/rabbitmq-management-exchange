@@ -81,9 +81,9 @@ handle_rpc(Method, Path, Id, VHost, ReplyTo, ReqBody) ->
                        type           = list_to_binary(integer_to_list(Code)),
                        content_type   = <<"application/json">>},
     Content = rabbit_basic:build_content(Props, [list_to_binary(ResBody)]),
-    {ok, Message} = rabbit_basic:message(rabbit_misc:r(VHost, exchange, <<>>),
-                                         ReplyTo, Content),
-    rabbit_basic:publish(rabbit_basic:delivery(false, Message, undefined)),
+    {ok, Msg} = rabbit_basic:message(rabbit_misc:r(VHost, exchange, <<>>),
+                                     ReplyTo, Content),
+    rabbit_basic:publish(rabbit_basic:delivery(false, false, Msg, undefined)),
     ok.
 
 req(Method, Path, Body) ->
