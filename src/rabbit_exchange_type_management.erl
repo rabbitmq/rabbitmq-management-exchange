@@ -32,6 +32,8 @@
     [{description, "exchange type x-management"},
      {mfa,         {rabbit_registry, register,
                     [exchange, <<"x-management">>, ?MODULE]}},
+     {cleanup,     {rabbit_registry, unregister,
+                    [exchange, <<"x-management">>]}},
      {requires,    rabbit_registry},
      {enables,     kernel_ready}]}).
 
