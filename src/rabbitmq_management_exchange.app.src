@@ -1,6 +1,6 @@
 {application, rabbitmq_management_exchange,
  [{description, "Management Exchange Type"},
-  {vsn, "%%VSN%%"},
+  {vsn, ""},
   {modules, []},
   {registered, []},
   {env, [{username, "guest"},
