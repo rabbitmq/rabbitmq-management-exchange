@@ -117,4 +117,4 @@ prefix() ->
                  false -> "http";
                  true  -> "https"
              end,
-    rabbit_misc:format("~s://localhost:~p/api/", [Scheme, Port]).
+    rabbit_misc:format("~s://localhost:~p/api", [Scheme, Port]).
