@@ -48,7 +48,7 @@ simple_test() ->
 
     receive
         {#'basic.deliver'{}, #amqp_msg{props   = Props,
-                                       payload = Payload}} ->
+                                       payload = _Payload}} ->
             ?assertMatch(<<"200">>, Props#'P_basic'.type),
             ?assertMatch(Id, Props#'P_basic'.correlation_id)
     end,
