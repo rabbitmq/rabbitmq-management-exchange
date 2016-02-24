@@ -15,7 +15,7 @@
 %%
 
 -module(rabbit_exchange_type_management_test).
--export([test/0]).
+
 -include_lib("eunit/include/eunit.hrl").
 
 -include_lib("amqp_client/include/amqp_client.hrl").

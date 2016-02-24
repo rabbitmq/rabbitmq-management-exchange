@@ -19,4 +19,4 @@ include erlang.mk
 # --------------------------------------------------------------------
 
 WITH_BROKER_TEST_COMMANDS := \
-	rabbit_exchange_type_management_test:simple_test()
+	eunit:test([rabbit_exchange_type_management_test],[verbose])
