@@ -5,4 +5,4 @@
   {registered, []},
   {env, [{username, "guest"},
          {password, "guest"}]},
-  {applications, [rabbitmq_management]}]}.
+  {applications, [inets, rabbitmq_management]}]}.
