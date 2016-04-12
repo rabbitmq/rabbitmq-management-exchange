@@ -24,6 +24,7 @@
 -export([validate/1, validate_binding/2,
          create/2, delete/3, policy_changed/2,
          add_binding/3, remove_bindings/3, assert_args_equivalence/2]).
+-export([info/1, info/2]).
 
 -import(rabbit_misc, [pget/2, pget/3]).
 
@@ -36,6 +37,9 @@
                     [exchange, <<"x-management">>]}},
      {requires,    rabbit_registry},
      {enables,     kernel_ready}]}).
+
+info(_X) -> [].
+info(_X, _) -> [].
 
 description() ->
     [{description, <<"Management Exchange">>}].
