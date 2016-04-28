@@ -5,5 +5,5 @@
   {registered, []},
   {env, [{username, "guest"},
          {password, "guest"}]},
-  {broker_version_requirements, []},
+  {broker_version_requirements, ["3.7.0"]},
   {applications, [inets, rabbitmq_management]}]}.
