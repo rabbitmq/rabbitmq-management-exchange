@@ -1,7 +1,7 @@
 .sw?
 .*.sw?
 *.beam
-/.erlang.mk/
+.erlang.mk/
 /cover/
 /deps/
 /doc/
@@ -9,4 +9,4 @@
 /logs/
 /plugins/
 
-/rabbitmq_management_exchange.d
+rabbitmq_management.d
