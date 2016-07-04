@@ -14,15 +14,48 @@
 %% Copyright (c) 2007-2016 Pivotal Software, Inc.  All rights reserved.
 %%
 
--module(rabbit_exchange_type_management_test).
+-module(rabbit_exchange_type_management_SUITE).
 
+-compile(export_all).
+
+-include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
-
 -include_lib("amqp_client/include/amqp_client.hrl").
 
-simple_test() ->
-    {ok, Conn} = amqp_connection:start(#amqp_params_network{}),
-    {ok, Ch} = amqp_connection:open_channel(Conn),
+-import(rabbit_ct_client_helpers, [open_connection_and_channel/1,
+                                   close_connection_and_channel/2]).
+
+all() ->
+    [simple_test].
+
+init_per_suite(Config) ->
+    rabbit_ct_helpers:log_environment(),
+    Config1 = rabbit_ct_helpers:set_config(Config, [
+        {rmq_nodename_suffix, ?MODULE}
+      ]),
+    rabbit_ct_helpers:run_setup_steps(Config1,
+      rabbit_ct_broker_helpers:setup_steps() ++
+      rabbit_ct_client_helpers:setup_steps()).
+
+end_per_suite(Config) ->
+    rabbit_ct_helpers:run_teardown_steps(Config,
+      rabbit_ct_client_helpers:teardown_steps() ++
+      rabbit_ct_broker_helpers:teardown_steps()).
+
+init_per_group(_, Config) ->
+    Config.
+
+end_per_group(_, Config) ->
+    Config.
+
+init_per_testcase(Testcase, Config) ->
+    rabbit_ct_helpers:testcase_started(Config, Testcase).
+
+end_per_testcase(Testcase, Config) ->
+    rabbit_ct_helpers:testcase_finished(Config, Testcase).
+
+simple_test(Config) ->
+    {Conn, Ch} = open_connection_and_channel(Config),
     #'exchange.declare_ok'{} =
         amqp_channel:call(
           Ch, #'exchange.declare'{exchange = <<"mgmt">>,
@@ -30,7 +63,7 @@ simple_test() ->
     #'queue.declare_ok'{queue = Q} =
         amqp_channel:call(Ch, #'queue.declare'{exclusive = true}),
 
-    Id = rabbit_guid:gen(),
+    Id = rabbit_ct_broker_helpers:rpc(Config, 0, rabbit_guid, gen, []),
 
     amqp_channel:cast(Ch,
                       #'basic.publish'{exchange    = <<"mgmt">>,
@@ -53,5 +86,4 @@ simple_test() ->
             ?assertMatch(Id, Props#'P_basic'.correlation_id)
     end,
 
-    amqp_connection:close(Conn),
-    ok.
+    close_connection_and_channel(Conn, Ch).
