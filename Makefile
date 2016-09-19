@@ -1,7 +1,7 @@
 PROJECT = rabbitmq_management_exchange
 
-DEPS = rabbit rabbitmq_management
-TEST_DEPS = amqp_client
+DEPS = rabbit_common rabbit rabbitmq_management
+TEST_DEPS = rabbitmq_ct_helpers amqp_client
 
 DEP_PLUGINS = rabbit_common/mk/rabbitmq-plugin.mk
 
