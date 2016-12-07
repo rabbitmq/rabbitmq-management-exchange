@@ -1,9 +1,0 @@
-{application, rabbitmq_management_exchange,
- [{description, "Management Exchange Type"},
-  {vsn, ""},
-  {modules, []},
-  {registered, []},
-  {env, [{username, "guest"},
-         {password, "guest"}]},
-  {broker_version_requirements, ["3.7.0"]},
-  {applications, [kernel, stdlib, rabbit_common, rabbit, inets, rabbitmq_management]}]}.
