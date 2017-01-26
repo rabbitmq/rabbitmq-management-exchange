@@ -80,17 +80,31 @@ assert_args_equivalence(X, Args) ->
 %% httpc seems to get racy when using HTTP 1.1
 -define(HTTPC_OPTS, [{version, "HTTP/1.0"}]).
 
+handle_rpc(Method, Path, Id, VHost, undefined = _ReplyTo, ReqBody) ->
+    fail_because_reply_to_is_missing();
+handle_rpc(Method, Path, Id, VHost, "" = _ReplyTo, ReqBody) ->
+    fail_because_reply_to_is_missing();
+handle_rpc(Method, Path, Id, VHost, <<"">> = _ReplyTo, ReqBody) ->
+    fail_because_reply_to_is_missing();
 handle_rpc(Method, Path, Id, VHost, ReplyTo, ReqBody) ->
-    {ok, {{_HTTP, Code, _}, _Headers, ResBody}} =
-        req(method(Method), binary_to_list(Path), ReqBody),
-    Props = #'P_basic'{correlation_id = Id,
+    case req(method(Method), binary_to_list(Path), ReqBody) of
+        {ok, {{_HTTP, Code, _}, _Headers, ResBody}} ->
+            Props = #'P_basic'{correlation_id = Id,
                        type           = list_to_binary(integer_to_list(Code)),
                        content_type   = <<"application/json">>},
-    Content = rabbit_basic:build_content(Props, [list_to_binary(ResBody)]),
-    {ok, Msg} = rabbit_basic:message(rabbit_misc:r(VHost, exchange, <<>>),
-                                     ReplyTo, Content),
-    rabbit_basic:publish(rabbit_basic:delivery(false, false, Msg, undefined)),
-    ok.
+            Content = rabbit_basic:build_content(Props, [list_to_binary(ResBody)]),
+            {ok, Msg} = rabbit_basic:message(rabbit_misc:r(VHost, exchange, <<>>),
+                                             ReplyTo, Content),
+            rabbit_basic:publish(rabbit_basic:delivery(false, false, Msg, undefined)),
+            ok;
+        {error, Reason} ->
+            exit({error, Reason})
+    end.
+
+fail_because_reply_to_is_missing() ->
+    Msg = "reply_to property isn't set or is blank, x-management won't be able to publish a response",
+    rabbit_log:error(Msg),
+    exit({error, Msg}).
 
 req(Method, Path, Body) ->
     {ok, U} = application:get_env(rabbitmq_management_exchange, username),
@@ -109,9 +123,13 @@ auth_header(Username, Password) ->
      "Basic " ++ binary_to_list(base64:encode(Username ++ ":" ++ Password))}.
 
 method(<<"GET">>)    -> get;
+method(<<"get">>)    -> get;
 method(<<"PUT">>)    -> put;
+method(<<"put">>)    -> put;
 method(<<"POST">>)   -> post;
+method(<<"post">>)   -> post;
 method(<<"DELETE">>) -> delete;
+method(<<"delete">>) -> delete;
 method(M)            -> exit({method_not_recognised, M}).
 
 prefix() ->
