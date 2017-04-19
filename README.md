@@ -66,7 +66,6 @@ See [RabbitMQ configuration guide](http://www.rabbitmq.com/configure.html) for d
 There is a usage example using the Java client in `examples/java`. See
 also the `test/src` directory for a simple test using the Erlang client.
 
-
 ## Building from Source
 
 Build it like any other plugin. See [Plugin Development](http://www.rabbitmq.com/plugin-development.html).
