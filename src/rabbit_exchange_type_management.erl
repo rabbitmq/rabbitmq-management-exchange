@@ -80,11 +80,11 @@ assert_args_equivalence(X, Args) ->
 %% httpc seems to get racy when using HTTP 1.1
 -define(HTTPC_OPTS, [{version, "HTTP/1.0"}]).
 
-handle_rpc(Method, Path, Id, VHost, undefined = _ReplyTo, ReqBody) ->
+handle_rpc(_Method, _Path, _Id, _VHost, undefined = _ReplyTo, _ReqBody) ->
     fail_because_reply_to_is_missing();
-handle_rpc(Method, Path, Id, VHost, "" = _ReplyTo, ReqBody) ->
+handle_rpc(_Method, _Path, _Id, _VHost, "" = _ReplyTo, _ReqBody) ->
     fail_because_reply_to_is_missing();
-handle_rpc(Method, Path, Id, VHost, <<"">> = _ReplyTo, ReqBody) ->
+handle_rpc(_Method, _Path, _Id, _VHost, <<"">> = _ReplyTo, _ReqBody) ->
     fail_because_reply_to_is_missing();
 handle_rpc(Method, Path, Id, VHost, ReplyTo, ReqBody) ->
     case req(method(Method), binary_to_list(Path), ReqBody) of
