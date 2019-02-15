@@ -26,7 +26,11 @@
                                    close_connection_and_channel/2]).
 
 all() ->
-    [simple_test].
+    [
+      overview_with_single_column,
+      overview_with_all_columns,
+      list_users
+     ].
 
 init_per_suite(Config) ->
     rabbit_ct_helpers:log_environment(),
@@ -54,7 +58,60 @@ init_per_testcase(Testcase, Config) ->
 end_per_testcase(Testcase, Config) ->
     rabbit_ct_helpers:testcase_finished(Config, Testcase).
 
-simple_test(Config) ->
+%%
+%% Tests
+%%
+
+overview_with_single_column(Config) ->
+    basic_overview_test(Config, <<"/overview?columns=rabbitmq_version">>).
+
+overview_with_all_columns(Config) ->
+    basic_overview_test(Config, <<"/overview">>).
+
+list_users(Config) ->
+    run_test(Config, fun() ->
+                      #'basic.publish'{exchange    = <<"mgmt">>,
+                                       routing_key = <<"/users/">>}
+                     end,
+                     fun(ReplyQ, CorrelationId) ->
+                       #amqp_msg{props   = #'P_basic'{reply_to       = ReplyQ,
+                                                      type           = <<"GET">>,
+                                                      correlation_id = CorrelationId},
+                                 payload = <<"">>}
+                     end,
+                     fun(_, #amqp_msg{props   = Props,
+                                      payload = Payload}, CorrelationId) ->
+                       ?assertMatch(<<"200">>, Props#'P_basic'.type),
+                       ?assertMatch(CorrelationId, Props#'P_basic'.correlation_id),
+
+                       Users = rabbit_json:decode(Payload),
+                       ?assert(lists:any(fun(#{<<"name">> := Name}) ->
+                                           Name =:= <<"guest">>
+                                         end, Users))
+                     end).
+
+%%
+%% Implementation
+%%
+
+basic_overview_test(Config, RoutingKey) ->
+    run_test(Config, fun() ->
+                        #'basic.publish'{exchange    = <<"mgmt">>,
+                                         routing_key = RoutingKey}
+                     end,
+                     fun(ReplyQ, CorrelationId) ->
+                       #amqp_msg{props   = #'P_basic'{reply_to       = ReplyQ,
+                                                      type           = <<"GET">>,
+                                                      correlation_id = CorrelationId},
+                                 payload = <<"">>}
+                     end,
+                     fun(_, #amqp_msg{props   = Props,
+                                      payload = _Payload}, CorrelationId) ->
+                       ?assertMatch(<<"200">>, Props#'P_basic'.type),
+                       ?assertMatch(CorrelationId, Props#'P_basic'.correlation_id)
+                     end).
+
+run_test(Config, BasicPublishFun, MessageFun, AssertionFun) ->
     {Conn, Ch} = open_connection_and_channel(Config),
     #'exchange.declare_ok'{} =
         amqp_channel:call(
@@ -65,13 +122,8 @@ simple_test(Config) ->
 
     Id = rabbit_ct_broker_helpers:rpc(Config, 0, rabbit_guid, gen, []),
 
-    amqp_channel:cast(Ch,
-                      #'basic.publish'{exchange    = <<"mgmt">>,
-                                       routing_key = <<"/overview?columns=rabbitmq_version">>},
-                      #amqp_msg{props   = #'P_basic'{reply_to       = Q,
-                                                     type           = <<"GET">>,
-                                                     correlation_id = Id},
-                                payload = <<"">>}),
+    BasicPublish = BasicPublishFun(),
+    amqp_channel:cast(Ch, BasicPublish, MessageFun(Q, Id)),
     amqp_channel:subscribe(Ch, #'basic.consume'{queue = Q, no_ack = true},
                            self()),
 
@@ -80,10 +132,8 @@ simple_test(Config) ->
     end,
 
     receive
-        {#'basic.deliver'{}, #amqp_msg{props   = Props,
-                                       payload = _Payload}} ->
-            ?assertMatch(<<"200">>, Props#'P_basic'.type),
-            ?assertMatch(Id, Props#'P_basic'.correlation_id)
+        {BasicDeliver, Message} ->
+            AssertionFun(BasicDeliver, Message, Id)
     end,
 
     close_connection_and_channel(Conn, Ch).
