@@ -14,7 +14,7 @@ plugin, we'll work to remove this limitation.
 ## Installation
 
 Install the corresponding .ez files from our
-[Community Plugins page](http://www.rabbitmq.com/community-plugins.html).
+[Community Plugins page](https://www.rabbitmq.com/community-plugins.html).
 
 After installing, enable it with the following command:
 
@@ -59,7 +59,7 @@ to authenticate HTTP API requests:
 
 If the above section is skipped, `guest/guest` will be used.
 
-See [RabbitMQ configuration guide](http://www.rabbitmq.com/configure.html) for details.
+See [RabbitMQ configuration guide](https://www.rabbitmq.com/configure.html) for details.
 
 ## Examples
 
@@ -68,4 +68,4 @@ also the `test/src` directory for a simple test using the Erlang client.
 
 ## Building from Source
 
-Build it like any other plugin. See [Plugin Development](http://www.rabbitmq.com/plugin-development.html).
+Build it like any other plugin. See [Plugin Development](https://www.rabbitmq.com/plugin-development.html).
