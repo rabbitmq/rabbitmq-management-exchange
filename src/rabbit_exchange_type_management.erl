@@ -133,10 +133,30 @@ method(<<"delete">>) -> delete;
 method(M)            -> exit({method_not_recognised, M}).
 
 prefix() ->
-    {ok, Listener} = application:get_env(rabbitmq_management, listener),
-    Port = pget(port, Listener),
-    Scheme = case pget(ssl, Listener, false) of
-                 false -> "http";
-                 true  -> "https"
-             end,
+    {ok, {Scheme, Port}} = get_management_listener(),
     rabbit_misc:format("~s://localhost:~p/api", [Scheme, Port]).
+
+get_management_listener() ->
+    Keys = [listener, tcp_config, ssl_config],
+    catch maybe_get_management_listener(Keys).
+
+maybe_get_management_listener([]) ->
+    % Note: nothing configured, so just guess
+    {ok, {"http", 15672}};
+maybe_get_management_listener([K|Tail]) ->
+    case application:get_env(rabbitmq_management, K) of
+        undefined ->
+            maybe_get_management_listener(Tail);
+        {ok, L} ->
+            Ssl = pget(ssl, L),
+            Scheme = case {K, Ssl} of
+                            {ssl_config, _} ->
+                                "https";
+                            {_, true} ->
+                                "https";
+                            _ ->
+                                "http"
+                        end,
+            Port = pget(port, L),
+            throw({ok, {Scheme, Port}})
+    end.
