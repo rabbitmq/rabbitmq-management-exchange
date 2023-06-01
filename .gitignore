@@ -26,3 +26,8 @@ ct_log_cache
 variables-ct*
 
 *.coverdata
+
+/user.bazelrc
+/bazel-*
+
+/.vscode/

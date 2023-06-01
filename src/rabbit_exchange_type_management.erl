@@ -47,20 +47,23 @@ route(#exchange{name = #resource{virtual_host = VHost}},
         rabbit_binary_parser:ensure_content_decoded(Content0),
     Payload = case PFR of
                   [] -> <<>>;
-                  _  -> lists:append(lists:reverse(PFR))
+                  _  -> erlang:iolist_to_binary(lists:reverse(PFR))
               end,
     [handle_rpc(Method, K, Id, VHost, ReplyTo, Payload) || K <- Keys],
     []. %% Don't route anything!
 
 validate(_X) -> ok.
 
-validate_binding(_X, _B) -> {error, cannot_bind_to_management_exchange}.
+validate_binding(_X, _B) -> {error, {'binding_invalid', "cannot_bind_to_management_exchange", []}}.
 
 create(_Tx, _X)          -> ok.
 delete(_Tx, _X, _Bs)     -> ok.
 policy_changed(_X1, _X2) -> ok.
 
+-spec add_binding(any(), any(), any()) -> no_return().
 add_binding(_Tx, _X, _B)      -> exit(should_never_happen).
+
+-spec remove_bindings(any(), any(), any()) -> no_return().
 remove_bindings(_Tx, _X, _Bs) -> exit(should_never_happen).
 
 assert_args_equivalence(X, Args) ->
@@ -86,12 +89,13 @@ handle_rpc(Method, Path, Id, VHost, ReplyTo, ReqBody) ->
             Content = rabbit_basic:build_content(Props, [list_to_binary(ResBody)]),
             {ok, Msg} = rabbit_basic:message(rabbit_misc:r(VHost, exchange, <<>>),
                                              ReplyTo, Content),
-            rabbit_basic:publish(rabbit_basic:delivery(false, false, Msg, undefined)),
+            _ = rabbit_basic:publish(rabbit_basic:delivery(false, false, Msg, undefined)),
             ok;
         {error, Reason} ->
             exit({error, Reason})
     end.
 
+-spec fail_because_reply_to_is_missing() -> no_return().
 fail_because_reply_to_is_missing() ->
     Msg = "reply_to property isn't set or is blank, x-management won't be able to publish a response",
     rabbit_log:error(Msg),
