@@ -69,3 +69,11 @@ also the `test/src` directory for a simple test using the Erlang client.
 ## Building from Source
 
 Build it like any other plugin. See [Plugin Development](https://www.rabbitmq.com/plugin-development.html).
+
+## Creating a Release
+
+1. Update `broker_version_requirements` in `helpers.bzl` & `Makefile` (Optional)
+1. Update the plugin version in `MODULE.bazel`
+1. Push a tag (i.e. `v3.12.0`) with the matching version
+1. Allow the Release workflow to run and create a draft release
+1. Review and publish the release
